@@ -20,7 +20,7 @@ class Gemini_Planner(Base_Planner):
 
 
     async def process_query(self,query:str) -> str:
-        query = self.short_memory(query)
+        query = await self.short_memory(query)
         contents = [
             types.Content(
                 role="user",
