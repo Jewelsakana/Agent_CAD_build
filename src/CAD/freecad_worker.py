@@ -1,5 +1,5 @@
 import sys,json
-from src.CAD.FreeCADTools import create_box,create_cylinder,create_sphere,create_cone,boolean_cut,boolean_fuse,export_stl,save_doc
+from src.CAD.FreeCADTools import create_box,create_cylinder,create_sphere,create_cone,boolean_cut,boolean_fuse,export_stl,save_doc,list_objects
 
 handlers = {
         "create_box":      create_box,
@@ -9,6 +9,7 @@ handlers = {
         "boolean_cut":     boolean_cut,
         "boolean_fuse":    boolean_fuse,
         "export_stl":      export_stl,
+        "list_objects":    list_objects,
     }
 
 def main():

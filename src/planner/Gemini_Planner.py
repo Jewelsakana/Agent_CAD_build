@@ -1,22 +1,13 @@
 """使用Gemini的规划器"""
-
-import asyncio
-import json
 import os
 
 from src.planner.Base_Planner import Base_Planner
-from src.tools.ToolRegistry import ToolRegistry
-from src.tools.local_tools import local_tools
-from src.tools.cad_tools import cad_tools
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
 
-_BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FREECAD_PYTHON_PATH = r"D:\FreeCAD\bin\python.exe"
-FREECAD_WORKER_PATH = os.path.join(_BASE, "src", "CAD", "freecad_worker.py")
 class Gemini_Planner(Base_Planner):
 
     def __init__(self):
@@ -27,40 +18,9 @@ class Gemini_Planner(Base_Planner):
             raise ValueError("未找到GOOGLE_API_KEY，请在 .env 中设置")
         self.client = genai.Client(api_key=api_key)
 
-        # 工具自注册
-        self.registry = ToolRegistry()
-        self.registry.register_many(cad_tools)
-        self.registry.register_many(local_tools)
-        
-        print(f"已注册{len(self.registry)}个工具：{self.registry.list_all()}")
-
-    async def execute_tool(self,tool_name:str,tool_args:dict)->dict:
-        tool = self.registry.get(tool_name)
-        if tool is None:
-            return {"status": "error", "message": f"未知工具: {tool_name}"}
-
-        if tool.location == "local":
-            return await tool.handler(**tool_args)
-        else:
-            return await self.run_freecad(tool_name,tool_args)
-        
-    async def run_freecad(self,tool_name:str,tool_args:dict)->dict:
-        # 传入干净的环境
-        env = os.environ.copy()
-        env.pop("PYTHONHOME",None)
-        env.pop("VIRTUAL_ENV", None)
-        proc = await asyncio.create_subprocess_exec(
-                FREECAD_PYTHON_PATH ,
-                FREECAD_WORKER_PATH,
-                tool_name,
-                json.dumps(tool_args),
-                stdout= asyncio.subprocess.PIPE,
-                env=env,
-            )
-        stdout, _ = await proc.communicate()
-        return json.loads(stdout)
 
     async def process_query(self,query:str) -> str:
+        query = self.short_memory(query)
         contents = [
             types.Content(
                 role="user",

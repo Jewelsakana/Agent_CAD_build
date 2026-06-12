@@ -26,6 +26,10 @@ class ToolRegistry:
         declarations = [t.to_gemini_declaration() for t in self._tools.values()]
         return types.Tool(function_declarations=declarations)
 
+    def get_openai_tools(self) -> list[dict]:
+        """返回 OpenAI / DeepSeek 格式的工具列表"""
+        return [t.to_openai_declaration() for t in self._tools.values()]
+
     def list_all(self) -> list[str]:
         return list(self._tools.keys())
 

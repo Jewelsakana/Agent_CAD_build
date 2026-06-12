@@ -16,6 +16,22 @@ def save_doc():
     os.makedirs("output",exist_ok=True)
     App.ActiveDocument.saveAs(DOC_PATH)
 
+def list_objects(args):
+    """返回文档中所有对象的信息"""
+    doc = ensure_doc()
+    objects = []
+
+    for obj in doc.Objects:
+        objects.append(
+            {
+                "name": obj.Name,
+                "label": obj.Label,
+                "type": obj.Shape.ShapeType if hasattr(obj.Shape, 'ShapeType') else "unknown",
+                "volume": round(obj.Shape.Volume, 2) if obj.Shape else 0,                
+            }
+        )
+    return {"status":"success","objects":objects,"count":len(objects)}
+
 # 1 ── 立方体 ──────────────────────────────────────────
 def create_box(args:dict)->dict:
     doc = ensure_doc()
